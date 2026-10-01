@@ -195,7 +195,7 @@ API устроен по REST (как json-server) и поддерживает т
 git add src/api/tags.ts src/app/tags.tsx src/api/client.ts src/api/secureStore.ts \
         src/components/app-tabs.tsx src/components/app-tabs.web.tsx TAGS_API.md
 git commit -m "Add tags API and Tags screen"
-git push origin main
+git push origin master
 ```
 
 ---
