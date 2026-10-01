@@ -4,7 +4,6 @@ import { Platform } from "react-native";
 const KEY = "FAKE_API_TOKEN";
 
 export async function saveToken(value: string): Promise<void> {
-  // SecureStore не поддерживается в вебе
   if (Platform.OS === "web") return;
   await SecureStore.setItemAsync(KEY, value);
 }
