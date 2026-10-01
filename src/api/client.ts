@@ -14,13 +14,12 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  (config) => {
-    getToken().then((item) => {
-      if (item) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${item}`;
-      }
-    });
+  async (config) => {
+    // ждём токен, иначе запрос уйдёт раньше, чем добавится заголовок
+    const item = await getToken();
+    if (item) {
+      config.headers.Authorization = `Bearer ${item}`;
+    }
 
     return config;
   },
