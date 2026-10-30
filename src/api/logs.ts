@@ -1,23 +1,29 @@
-// api for /logs
 import apiClient from "./client";
+
+export interface LogAuthor {
+  id: number | string;
+  name: string;
+}
+
+export interface LogMeta {
+  id: number;
+}
 
 export interface Log {
   id: number;
   resource: string;
   action: string;
-  data: Record<string, unknown> | null;
+  author: LogAuthor;
+  data: Record<string, unknown>;
   previousData?: Record<string, unknown>;
-  meta: Record<string, unknown>;
-  author?: Record<string, unknown>;
+  meta: LogMeta;
   timestamp: string;
 }
 
-// GET /logs — получение списка всех записей журнала
 export const getLogs = async () => {
   return apiClient.get<Log[]>("/logs");
 };
 
-// GET /logs/{id} — получение записи журнала по id
 export const getLogById = async (id: number) => {
   return apiClient.get<Log>(`/logs/${id}`);
 };
