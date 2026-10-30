@@ -1,33 +1,12 @@
-// api for /users
+// api for /samples
 import apiClient from "./client";
-
-export interface Avatar {
-  name: string;
-  percent: number;
-  size: string;
-  status: string;
-  type: string;
-  uid: string;
-  url: string;
-}
-
-export interface User {
+export interface Sample {
   id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  status: boolean;
-  birthday?: string;
-  skills?: string[];
-  avatar?: Avatar[];
+  [key: string]: any; 
 }
-
-// GET /users — получение списка всех пользователей
-export const getUsers = async () => {
-  return apiClient.get<User[]>("/users");
+export const getSamples = async () => {
+  return apiClient.get<Sample[]>("/samples");
 };
-
-// GET /users — получение пользователя по id
-export const getUserById = async (id: number) => {
-  return apiClient.get<User[]>(`/users/${id}`);
+export const getSampleById = async (id: number) => {
+  return apiClient.get<Sample>(`/samples/${id}`);
 };

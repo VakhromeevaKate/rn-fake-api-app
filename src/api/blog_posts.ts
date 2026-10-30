@@ -1,25 +1,22 @@
-// api for /blog_posts
 import apiClient from "./client";
 
-
-export interface Category{
+export interface Category {
   id: number;
 }
 
-export interface Blog_posts {
+export interface BlogPost {
   id: number;
   title: string;
   content: string;
-  category: string;
+  category: Category;
   status: string;
+  createdAt: string;
 }
 
-// GET /blog_posts — получение списка всех постов
-export const getBlog_posts = async () => {
-  return apiClient.get<Blog_posts[]>("/blog_posts");
+export const getBlogPosts = async () => {
+  return apiClient.get<BlogPost[]>("/blog_posts");
 };
 
-// GET /blog_posts — получение поста по id
-export const getBlog_postById = async (id: number) => {
-  return apiClient.get<Blog_posts[]>(`/blog_posts/${id}`);
+export const getBlogPostById = async (id: number) => {
+  return apiClient.get<BlogPost>(`/blog_posts/${id}`);
 };
