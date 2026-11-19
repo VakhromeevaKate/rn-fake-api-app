@@ -1,6 +1,6 @@
 
-import { usePreventScreenCapture } from "expo-screen-capture";
-import { useState } from "react";
+import * as ScreenCapture from "expo-screen-capture";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -23,16 +23,41 @@ const TEST_LOGIN = "student";
 const TEST_PASSWORD = "student123";
 
 export default function AuthScreen({ onLogin }: AuthScreenProps) {
-  // Защита экрана от записи и снимков экрана там,
-  // где это поддерживается операционной системой.
-  usePreventScreenCapture();
-
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Защита от скриншотов на мобильных устройствах.
+  // В браузере защита не включается.
+  useEffect(() => {
+    if (Platform.OS === "web") {
+      return;
+    }
+
+    let isActive = true;
+
+    const enableProtection = async () => {
+      try {
+        if (isActive) {
+          await ScreenCapture.preventScreenCaptureAsync();
+        }
+      } catch (error) {
+        console.warn("Ошибка защиты экрана:", error);
+      }
+    };
+
+    enableProtection();
+
+    return () => {
+      isActive = false;
+
+      ScreenCapture.allowScreenCaptureAsync().catch(() => {});
+    };
+  }, []);
+
+  // Проверка логина и пароля.
   const handleLogin = async () => {
     setError("");
 
@@ -41,22 +66,34 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
       return;
     }
 
-    setIsLoading(true);
+    if (
+      login.trim().toLowerCase() !== TEST_LOGIN ||
+      password !== TEST_PASSWORD
+    ) {
+      setError("Неверный логин или пароль");
+      return;
+    }
 
     try {
-      if (
-        login.trim().toLowerCase() === TEST_LOGIN &&
-        password === TEST_PASSWORD
-      ) {
-        // Сохраняем тестовый токен в защищённом хранилище.
-        await saveToken("fake-auth-token");
+      setIsLoading(true);
 
-        onLogin();
-      } else {
-        setError("Неверный логин или пароль");
-      }
-    } catch {
-      setError("Не удалось выполнить вход. Попробуйте ещё раз.");
+      console.log("1. Проверка данных пройдена");
+
+      await saveToken("fake-auth-token");
+
+      console.log("2. Токен успешно сохранён");
+
+      onLogin();
+
+      console.log("3. Авторизация завершена");
+    } catch (err) {
+      console.error("Ошибка авторизации:", err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Не удалось выполнить вход"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +121,9 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
           </View>
 
           <View style={styles.form}>
-            <ThemedText style={styles.label}>Логин</ThemedText>
+            <ThemedText style={styles.label}>
+              Логин
+            </ThemedText>
 
             <TextInput
               style={styles.input}
@@ -97,7 +136,9 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
               editable={!isLoading}
             />
 
-            <ThemedText style={styles.label}>Пароль</ThemedText>
+            <ThemedText style={styles.label}>
+              Пароль
+            </ThemedText>
 
             <View style={styles.passwordContainer}>
               <TextInput
@@ -119,10 +160,6 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                   setIsPasswordVisible(!isPasswordVisible)
                 }
                 style={styles.showPasswordButton}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  isPasswordVisible ? "Скрыть пароль" : "Показать пароль"
-                }
               >
                 <ThemedText style={styles.showPasswordText}>
                   {isPasswordVisible ? "Скрыть" : "Показать"}
